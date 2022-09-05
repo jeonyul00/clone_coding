@@ -1,1 +1,16 @@
-가끔 메모는 여기에서-
+-----------------------------------------------------------------------------------------------------------------------
+폴더 구조
+android: 안드로이드 네이티브 폴더
+ios: ios 네이티브 폴더
+node_modules: 노드 라이브러리
+app.json: name은 앱 컴포넌트 이름이니 함부로 바꾸면 안 됨, 이거 바꾸면 네이티브 컴포넌트 이름도 다 바꿔야함, displayName은 앱 이름 변경용
+ios/FoodDeliveryApp/AppDelegate.m 의 moduleName
+android/app/src/main/java/com/fooddeliveryapp/MainActivity.java 의 getMainComponentName
+babel.config.js: 바벨 설정
+index.js: 메인 파일
+App.tsx: 기본 App 컴포넌트
+metro.config.js: 메트로 설정 파일(웹팩 대신 사용)
+tsconfig.json: 타입스크립트 설정
+android/app/src/main/java/com/fooddeliveryapp/MainActivity.java: 안드로이드 액티비티에서 js엔진 통해 리액트 코드 실행 + bridge로 소통
+-----------------------------------------------------------------------------------------------------------------------
+웹뷰를 쓰는 이유 : 앱의 경우에는 배포를 할 때 앱스토어를 거쳐서 해야하는데 웹의 경우는 실시간 반영이 된다 이러한 점 때문에 웹뷰를 쓴다
