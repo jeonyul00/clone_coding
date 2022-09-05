@@ -13,4 +13,12 @@ metro.config.js: 메트로 설정 파일(웹팩 대신 사용)
 tsconfig.json: 타입스크립트 설정
 android/app/src/main/java/com/fooddeliveryapp/MainActivity.java: 안드로이드 액티비티에서 js엔진 통해 리액트 코드 실행 + bridge로 소통
 -----------------------------------------------------------------------------------------------------------------------
+디버깅
+1. 기본적으로 크롭으로 쓰는법 : 이거 근데 네트워크 상태 안보여서 별로
+2. 플리퍼 : 연동이 어렵다 이거 나중에 공부 좀 해봐야겠다
+    공홈에서 설치하고 setup doctor에서 openSsl installed 체크 되어있는지 확인하고 난 후에 문제가 날 시
+    npm i react-native-flipper redux-flipper rn-async-storage-flipper @react-native-async-storage/async-storage --force
+    npx pod-install 
+-----------------------------------------------------------------------------------------------------------------------
+
 웹뷰를 쓰는 이유 : 앱의 경우에는 배포를 할 때 앱스토어를 거쳐서 해야하는데 웹의 경우는 실시간 반영이 된다 이러한 점 때문에 웹뷰를 쓴다
