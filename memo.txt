@@ -1,4 +1,4 @@
------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------
 폴더 구조
 android: 안드로이드 네이티브 폴더
 ios: ios 네이티브 폴더
@@ -12,13 +12,54 @@ App.tsx: 기본 App 컴포넌트
 metro.config.js: 메트로 설정 파일(웹팩 대신 사용)
 tsconfig.json: 타입스크립트 설정
 android/app/src/main/java/com/fooddeliveryapp/MainActivity.java: 안드로이드 액티비티에서 js엔진 통해 리액트 코드 실행 + bridge로 소통
------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------
 디버깅
 1. 기본적으로 크롭으로 쓰는법 : 이거 근데 네트워크 상태 안보여서 별로
 2. 플리퍼 : 연동이 어렵다 이거 나중에 공부 좀 해봐야겠다
-    공홈에서 설치하고 setup doctor에서 openSsl installed 체크 되어있는지 확인하고 난 후에 문제가 날 시
-    npm i react-native-flipper redux-flipper rn-async-storage-flipper @react-native-async-storage/async-storage --force
-    npx pod-install 
------------------------------------------------------------------------------------------------------------------------
+    공홈에서 설치하고 setup doctor에서 openSsl installed 체크 되어있는지 확인하고 난 후에
+        플러그인 설치
+        npm i react-native-flipper redux-flipper rn-async-storage-flipper @react-native-async-storage/async-storage --force
+        npx pod-install
+    겁나 어렵다
+---------------------------------------------------------------------------------------------------------------------------
+앱 네임 변경하는 법
+1. app.json의 displayName를 변경 (이거 바꾼다고 바뀌지 않음, 이거부터 바꾸는거지)
+2. \android\app\src\main\res\values\strings.xml애서 이름 변경 (안드로이드)
+3. \ios\프로젝트이름\Info.plist의 CFBundleDisplayName를 변경 !! string이 아니라 key를 수정해야한다 !! 제발 이거 좀 읽어줘 key key key
+---------------------------------------------------------------------------------------------------------------------------
+페이지 설정 (네비게이션)
+npm install @react-navigation/native
+npm install @react-navigation/native-stack
+npm install react-native-screens react-native-safe-area-context
 
+안드로이드 쪽에서 (android/app/src/main/java/<your package name>/MainActivity.java)
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+  super.onCreate(null);
+}
+
+android/build.gradle에서
+buildscript {
+    ext {
+        ...
+        kotlin_version = '1.6.10'
+    }
+    ...
+    dependencies {
+        ...
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+    ...
+}
+
+이거 써야된다
+
+나는 ios전용으로 하니까 생략-
+
+cd ios / pod install
+
+공식문서 가면 다 나와 있다
+---------------------------------------------------------------------------------------------------------------------------
+etc
 웹뷰를 쓰는 이유 : 앱의 경우에는 배포를 할 때 앱스토어를 거쳐서 해야하는데 웹의 경우는 실시간 반영이 된다 이러한 점 때문에 웹뷰를 쓴다
+
