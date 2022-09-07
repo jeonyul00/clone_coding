@@ -1,67 +1,73 @@
 import * as React from 'react';
-import {NavigationContainer, ParamListBase} from '@react-navigation/native';
-import {
-  createNativeStackNavigator,
-  NativeStackScreenProps,
-} from '@react-navigation/native-stack';
-import {Text, TouchableOpacity, View} from 'react-native';
-import {useCallback} from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import Settings from './src/pages/Settings';
+import Orders from './src/pages/Orders';
+import Delivery from './src/pages/Delivery';
+import {useState} from 'react';
+import SignIn from './src/pages/SignIn';
+import SignUp from './src/pages/SignUp';
+import {Provider} from 'react-redux';
+import store from './src/store';
 
-type RootStackParamList = {
-  Home: undefined;
-  Details: undefined;
+export type LoggedInParamList = {
+  Orders: undefined;
+  Settings: undefined;
+  Delivery: undefined;
+  Complete: {orderId: string};
 };
-type HomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
-type DetailsScreenProps = NativeStackScreenProps<ParamListBase, 'Details'>;
 
-// navigation에 type 지정할떄 이미 위에서 지정함, 이건 공부해야돼 -> 공식 문서를 보자
-function HomeScreen({navigation}: HomeScreenProps) {
-  const onClick = useCallback(() => {
-    navigation.navigate('Details');
-  }, [navigation]);
+export type RootStackParamList = {
+  SignIn: undefined;
+  SignUp: undefined;
+};
 
-  return (
-    <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-      <TouchableOpacity onPress={onClick}>
-        <Text>Home Screen</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-
-function DetailsScreen({navigation}: DetailsScreenProps) {
-  const onClick = useCallback(() => {
-    navigation.navigate('Home');
-  }, [navigation]);
-
-  return (
-    <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-      <TouchableOpacity onPress={onClick}>
-        <Text>Details Screen</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-
-// stack은 계속 쌓인다
+// tab과 stack 중첩 사용하는 법
+const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function App() {
+  const [isLoggedIn, setLoggedIn] = useState(false);
   return (
-    // 네비게이션을 쓸 때 전체를 <NavigationContainer>로 감싼다 : 이래야 작동이 된다
-    <NavigationContainer>
-      {/* Navigator가 페이지를 그룹으로 묶는다 */}
-      <Stack.Navigator initialRouteName="Home">
-        {/* Screen 컴포넌트가 component에게 props로 네비게이션과 라우터를 전달해줌 */}
-        {/*   ㄴ 이 말은 페이지에서 useNavi를 선언하기보다는 props로 전달하는것이 코드가 효율적임 */}
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{title: 'home'}}
-        />
-        <Stack.Screen name="Details" component={DetailsScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Provider store={store}>
+      <NavigationContainer>
+        {isLoggedIn ? (
+          // 각 tab 안에 여러 화면을 넣어둠
+          <Tab.Navigator>
+            <Tab.Screen
+              name="Orders"
+              component={Orders}
+              options={{title: '오더 목록'}}
+            />
+            {/* 중첩을 이렇게도 쓰네, 캔따개랑은 다르게 직접 페이지 안에서 분기시킨다  */}
+            <Tab.Screen
+              name="Delivery"
+              component={Delivery}
+              options={{headerShown: false}}
+            />
+            <Tab.Screen
+              name="Settings"
+              component={Settings}
+              options={{title: '내 정보'}}
+            />
+          </Tab.Navigator>
+        ) : (
+          <Stack.Navigator>
+            <Stack.Screen
+              name="SignIn"
+              component={SignIn}
+              options={{title: '로그인'}}
+            />
+            <Stack.Screen
+              name="SignUp"
+              component={SignUp}
+              options={{title: '회원가입'}}
+            />
+          </Stack.Navigator>
+        )}
+      </NavigationContainer>
+    </Provider>
   );
 }
 
