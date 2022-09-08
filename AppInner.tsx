@@ -11,10 +11,23 @@ import SignIn from './src/pages/SignIn';
 import SignUp from './src/pages/SignUp';
 import {RootState} from './src/store/reducer';
 
+export type LoggedInParamList = {
+  Orders: undefined;
+  Settings: undefined;
+  Delivery: undefined;
+  Complete: {orderId: string};
+};
+
+export type RootStackParamList = {
+  SignIn: undefined;
+  SignUp: undefined;
+};
+
+const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
+
 function AppInner() {
   // tab과 stack 중첩 사용하는 법
-  const Tab = createBottomTabNavigator();
-  const Stack = createNativeStackNavigator();
 
   // const [isLoggedIn, setLoggedIn] = useState(false);
   // 전역으로 관리하기 위해서 useSelector

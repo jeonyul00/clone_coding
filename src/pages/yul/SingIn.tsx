@@ -6,74 +6,37 @@ import {
   Text,
   TextInput,
   View,
-  ActivityIndicator,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import EncryptedStorage from 'react-native-encrypted-storage';
+import {RootStackParamList} from '../../App';
 import DismissKeyboardView from '../components/DismissKeyboardView';
-import axios, {AxiosError} from 'axios';
-import Config from 'react-native-config';
-import {RootStackParamList} from '../../AppInner';
-import {useAppDispatch} from '../store';
-import userSlice from '../slices/user';
 
 type SignInScreenProps = NativeStackScreenProps<RootStackParamList, 'SignIn'>;
 
 function SignIn({navigation}: SignInScreenProps) {
-  const dispatch = useAppDispatch();
-  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  // ref는 기본적으로 null이 들어갈 수 있다, 코드가 순차적으로 실행되는데 실제 코드가 입력되면 그 때 타입이 null에서 바뀐다
   const emailRef = useRef<TextInput | null>(null);
   const passwordRef = useRef<TextInput | null>(null);
 
+  // trim : 띄어쓰기 자르기
   const onChangeEmail = useCallback(text => {
     setEmail(text.trim());
   }, []);
   const onChangePassword = useCallback(text => {
     setPassword(text.trim());
   }, []);
-  const onSubmit = useCallback(async () => {
-    if (loading) {
-      return;
-    }
+
+  const onSubmit = useCallback(() => {
     if (!email || !email.trim()) {
       return Alert.alert('알림', '이메일을 입력해주세요.');
     }
     if (!password || !password.trim()) {
       return Alert.alert('알림', '비밀번호를 입력해주세요.');
     }
-    try {
-      setLoading(true);
-      // 데이터 보내기
-      const response = await axios.post(`${Config.API_URL}/login`, {
-        email,
-        password,
-      });
-      // 로그인을 하면 서버에서 토큰을 보내준다  response에 들어있겠지
-      console.log(response.data);
-      Alert.alert('알림', '로그인 되었습니다.');
-
-      dispatch(
-        userSlice.actions.setUser({
-          name: response.data.data.name,
-          email: response.data.data.email,
-          accessToken: response.data.data.accessToken,
-        }),
-      );
-      await EncryptedStorage.setItem(
-        'refreshToken',
-        response.data.data.refreshToken,
-      );
-    } catch (error) {
-      const errorResponse = (error as AxiosError).response;
-      if (errorResponse) {
-        Alert.alert('알림', errorResponse.data.message);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [loading, dispatch, email, password]);
+    Alert.alert('알림', '로그인 되었습니다.');
+  }, [email, password]);
 
   const toSignUp = useCallback(() => {
     navigation.navigate('SignUp');
@@ -89,14 +52,20 @@ function SignIn({navigation}: SignInScreenProps) {
           onChangeText={onChangeEmail}
           placeholder="이메일을 입력해주세요"
           placeholderTextColor="#666"
+          // importantForAutofill, autoComplete, textContentType : 저장 되는거, 지문인식하면 자동으로 불러와지고 하는 기능 쓰려면 저거 3개 해두면 됨
+          // 이거 공부 할 것, 공식문서부터
           importantForAutofill="yes"
           autoComplete="email"
           textContentType="emailAddress"
           value={email}
+          // 키패드에서 리턴 버튼 바꿈
           returnKeyType="next"
           clearButtonMode="while-editing"
           ref={emailRef}
+          // 엔터 눌렀을때 포커스가 비밀번호로 넘어가게 코딩
+          // onSubmitEditing : 엔터를 누를 때
           onSubmitEditing={() => passwordRef.current?.focus()}
+          // 엔터를 치면 키보드가 내려가는데 키보드 내려가는거 막는거
           blurOnSubmit={false}
         />
       </View>
@@ -113,8 +82,10 @@ function SignIn({navigation}: SignInScreenProps) {
           textContentType="password"
           secureTextEntry
           returnKeyType="send"
+          // clearButtonMode : 입력 시 옆에 x표시 뜨게 하는거 : ios에서만 나옴
           clearButtonMode="while-editing"
           ref={passwordRef}
+          // onSubmitEditing : 엔터 쳤을때
           onSubmitEditing={onSubmit}
         />
       </View>
@@ -122,16 +93,13 @@ function SignIn({navigation}: SignInScreenProps) {
         <Pressable
           style={
             canGoNext
-              ? StyleSheet.compose(styles.loginButton, styles.loginButtonActive)
+              ? // compose : 배열로 담는거랑 같다 : 배열이랑 같은 결과
+                StyleSheet.compose(styles.loginButton, styles.loginButtonActive)
               : styles.loginButton
           }
-          disabled={!canGoNext || loading}
+          disabled={!canGoNext}
           onPress={onSubmit}>
-          {loading ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <Text style={styles.loginButtonText}>로그인</Text>
-          )}
+          <Text style={styles.loginButtonText}>로그인</Text>
         </Pressable>
         <Pressable onPress={toSignUp}>
           <Text>회원가입하기</Text>

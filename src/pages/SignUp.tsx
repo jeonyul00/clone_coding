@@ -1,5 +1,6 @@
 import React, {useCallback, useRef, useState} from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Platform,
   Pressable,
@@ -9,8 +10,10 @@ import {
   View,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../App';
+import {RootStackParamList} from '../../AppInner';
 import DismissKeyboardView from '../components/DismissKeyboardView';
+import axios from 'axios';
+import Config from 'react-native-config';
 
 type SignUpScreenProps = NativeStackScreenProps<RootStackParamList, 'SignUp'>;
 
@@ -22,6 +25,9 @@ function SignUp({navigation}: SignUpScreenProps) {
   const nameRef = useRef<TextInput | null>(null);
   const passwordRef = useRef<TextInput | null>(null);
 
+  // 로딩창
+  const [loading, setLoading] = useState(false);
+
   const onChangeEmail = useCallback(text => {
     setEmail(text.trim());
   }, []);
@@ -31,7 +37,10 @@ function SignUp({navigation}: SignUpScreenProps) {
   const onChangePassword = useCallback(text => {
     setPassword(text.trim());
   }, []);
-  const onSubmit = useCallback(() => {
+  const onSubmit = useCallback(async () => {
+    if (loading) {
+      return;
+    }
     if (!email || !email.trim()) {
       return Alert.alert('알림', '이메일을 입력해주세요.');
     }
@@ -56,7 +65,27 @@ function SignUp({navigation}: SignUpScreenProps) {
       );
     }
     console.log(email, name, password);
-    Alert.alert('알림', '회원가입 되었습니다.');
+    // 데이터 보내기
+    try {
+      // 어디로 뭘 보내는지 쓸 것 너무 당연하져
+      // 인자 순서는 유알엘, 데이터, 헤더?
+
+      setLoading(true); // 통신이 언제 끝날 지 모르기 때문에 로딩 창을 띄우려고 이거 쓴다, 나중에 만약 로딩이 트루면 어쩌구
+      // Config.API_URL : config 분기처리 : .env에 있음
+      console.log('test Config.API_URL -----> ', Config.API_URL);
+      const response = await axios.post(`${Config.API_URL}/user`, {
+        email,
+        name,
+        password, // 여기서 패스워드는 일방향 암호화 된다 ex) hana00 ---> 12f4sd65f46421 이딴식으로 바뀜 이것이 hash화
+        // 혹여 어디서 다시 써야한다? 그럼 복호화한다 그것이 양방향 암호화, 근데 비밀번호는 양방향으로 할 일이 없겠지
+      });
+      navigation.navigate('SignIn');
+      // unknown : 뭔지 모름이라는 뜻
+    } catch (e: unknown) {
+      console.log('axios error -----> ', e);
+    } finally {
+      setLoading(false);
+    }
   }, [email, name, password]);
 
   const canGoNext = email && name && password;
@@ -118,9 +147,14 @@ function SignUp({navigation}: SignUpScreenProps) {
               ? StyleSheet.compose(styles.loginButton, styles.loginButtonActive)
               : styles.loginButton
           }
-          disabled={!canGoNext}
+          disabled={!canGoNext || loading}
           onPress={onSubmit}>
-          <Text style={styles.loginButtonText}>회원가입</Text>
+          {loading ? (
+            // 그 로딩 때 원 돌아가는거
+            <ActivityIndicator color={'#ffff'} />
+          ) : (
+            <Text style={styles.loginButtonText}>회원가입</Text>
+          )}
         </Pressable>
       </View>
     </DismissKeyboardView>

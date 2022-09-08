@@ -16,6 +16,8 @@ const userSlice = createSlice({
       state.accessToken = action.payload.accessToken;
     },
   },
+  // extraReducers : 보통 비동기 리듀서 만들때 쓰임
+  // 설명 참 거지같네; 나중에 알아보자
   extraReducers: builder => {},
 });
 
