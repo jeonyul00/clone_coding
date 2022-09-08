@@ -89,12 +89,13 @@ function AppInner() {
     };
 
     if (socket && isLoggedIn) {
-      //acceptOrder 이거 없어도 되는거 아닌가 : 이거 안 보내면 서버가 응답을 안함 ㅅㅂ 왜지
+      //acceptOrder 이거 없어도 되는거 아닌가
+      // 이거 안 보내면 서버가 응답을 안함 ㅅㅂ 왜지
       //  ㄴ 백엔드에서 acceptOrder로 로그인을 해야지만 order을 받을 수 있도록 로직이 짜여져있다
       socket.emit('acceptOrder', 'hello');
       socket.on('order', callback);
     }
-    // 이건 클린 함수인가, 이거 깜빡하지말자
+    // cleanUp
     return () => {
       if (socket) {
         socket.off('order', callback);
@@ -113,7 +114,6 @@ function AppInner() {
   return (
     <NavigationContainer>
       {isLoggedIn ? (
-        // 각 tab 안에 여러 화면을 넣어둠
         <Tab.Navigator>
           <Tab.Screen
             name="Orders"
