@@ -1,15 +1,18 @@
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import axios, {AxiosError} from 'axios';
 import React, {useEffect} from 'react';
-
-import {useSelector} from 'react-redux';
+import Config from 'react-native-config';
+import EncryptedStorage from 'react-native-encrypted-storage';
+import {useDispatch, useSelector} from 'react-redux';
 import useSocket from './src/hoooks/useSoket';
 import Delivery from './src/pages/Delivery';
 import Orders from './src/pages/Orders';
 import Settings from './src/pages/Settings';
 import SignIn from './src/pages/SignIn';
 import SignUp from './src/pages/SignUp';
+import userSlice from './src/slices/user';
 import {RootState} from './src/store/reducer';
 
 export type LoggedInParamList = {
@@ -28,33 +31,73 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function AppInner() {
-  // tab과 stack 중첩 사용하는 법
-
   // const [isLoggedIn, setLoggedIn] = useState(false);
   // 전역으로 관리하기 위해서 useSelector
   // state가 뭐냐면 전체 상태(rootreducer) -> 여기서 유저를 꺼내서 그 안의 이메일
   const isLoggedIn = useSelector((state: RootState) => !!state.user.email);
+  const dispatch = useDispatch();
+
+  // 앱 실행 시 토큰 있으면 로그인하는 코드
+  // useEffect는 async 함수 안됨 그래서 안에서 만들어서 씀
+  useEffect(() => {
+    const getTokenAndRefresh = async () => {
+      try {
+        const token = await EncryptedStorage.getItem('refreshToken');
+        if (!token) {
+          return;
+        }
+        const response = await axios.post(
+          `${Config.API_URL}/refreshToken`,
+          {},
+          {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        // redux에 저장
+        dispatch(
+          userSlice.actions.setUser({
+            name: response.data.data.name,
+            email: response.data.data.email,
+            accessToken: response.data.data.accessToken,
+          }),
+        );
+      } catch (error) {
+        console.error(error);
+        if ((error as AxiosError).response?.data.code === 'expired') {
+          Alert.alert('알림', '다시 로그인 해주세요.');
+        }
+      } finally {
+        // todo : 스플래시 없애기
+      }
+    };
+    getTokenAndRefresh();
+  }, [dispatch]);
 
   // 웹소켓
   const [socket, disconnect] = useSocket();
-
   // 웹소켓
+  // 데이터는 키,값 꼴로 옴
+  // 'order' , {orderId:1,price : 9000, latitude:37.5, longitude:127.5 }
+  // 서버가 order라는 key로 클라이언트에게 {orderId:1,price : 9000, latitude:37.5, longitude:127.5 } 값을 줌
+  // 서버로 부터 데이터 받을때는 콜백 방식으로 받아야됨
   useEffect(() => {
-    const helloCallback = (data: any) => {
+    const callback = (data: any) => {
       console.log(data);
     };
+
     if (socket && isLoggedIn) {
-      console.log(socket);
-      // login이라는 키로 hello를 받을거다
-      socket.emit('login', 'hello');
-      // hello 라는 키로 helloCallback을 받는거다
-      socket.on('hello', helloCallback);
+      //acceptOrder 이거 없어도 되는거 아닌가 : 이거 안 보내면 서버가 응답을 안함 ㅅㅂ 왜지
+      //  ㄴ 백엔드에서 acceptOrder로 로그인을 해야지만 order을 받을 수 있도록 로직이 짜여져있다
+      socket.emit('acceptOrder', 'hello');
+      socket.on('order', callback);
     }
-    // 이건 클린 함수인가
+    // 이건 클린 함수인가, 이거 깜빡하지말자
     return () => {
       if (socket) {
-        // off  : on 중단 : 연결 끊기
-        socket.off('hello', helloCallback);
+        socket.off('order', callback);
       }
     };
   }, [isLoggedIn, socket]);
