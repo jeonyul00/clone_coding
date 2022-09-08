@@ -1,5 +1,6 @@
 import {createSlice} from '@reduxjs/toolkit';
 
+// 기본값 설정
 const initialState = {
   name: '',
   email: '',
