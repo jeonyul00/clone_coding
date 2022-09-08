@@ -94,6 +94,7 @@ reducer : 액션이 실제로 실행되면 state를 바꾸는 로직
 백엔드와 연동
 npm i axios : 요즘은 ky나 got로 넘어가는 추세라네
 
+아 axios.post(서버주소, 데이터, 옵션(예를 들면 헤더))
 ---------------------------------------------------------------------------------------------------------------------------
 회원가입 로그인 플로우
 npm install react-native-encrypted-storage : 스토리지
@@ -141,7 +142,48 @@ redux에 넣은 데이터는 앱을 끄면 날아감
 개발 환경별로 달라지는 값은 react-native-config에 저장하면 좋음(암호화 안 됨)
 그 외에 유지만 되면 데이터들은 async-storage에 저장(npm install @react-native-async-storage/async-storage)
 
+accessToken에는 유저의 정보가 있는데 유효기간이 있다
+이 기간이 지나면 refreshToken을 서버로 보내면 새로운 accessToken을 새로 발급해준다
+
+
+EncryptedStorage 사용법
+    promise여서 await 붙여서 써야함
+    setItem : 저장
+    getItem : 가져오기
+await EncryptedStorage.setItem('키', '값');
+await EncryptedStorage.removeItem('키');
+const 값 = await EncryptedStorage.getItem('키');
 ---------------------------------------------------------------------------------------------------------------------------
+웹소켓 : 양방향 통신
+npm i socket.io-client
+
+     첫번째 프롭스 : 서버주소
+     두번째 프롭스 : 옵션
+
+     io(서버주소,{
+     transports : ['websoket'],
+     path : '/socket-io'
+     })
+
+     socket = io(Config.API_URL, {
+      // transports: ['websocket'], : 롱 폴링 기법을 빼버림
+      // long-polling : 서버에게 새로운 데이터가 있는지 실시간으로 확인하도록 요청하는것 : 굉장히 비 효율적이다
+      transports: ['websocket'],
+    });
+
+    !! 프로젝트 내에서 한 번만 연결되면 된다 custom hook을 만들어서 가져와서 쓸 때 만얃 3번 가져오면 3번 연결이 되고 응답도 3번 받는다
+    이런 비효율을 막기 위한 코드를 useSoket에 써두었다
+
+    socket.emit : 서버에게 데이터를 보내는 것
+    socket.on : 서버에게 데이터를 받는 것
+
+    socket는 키 값 형태로 되어있다
+
+    // login이라는 키로 hello를 받을거다
+    socket.emit('login', 'hello');
+    // hello 라는 키로 helloCallback을 받는거다
+    socket.on('hello', helloCallback);
+
 ---------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------

@@ -14,13 +14,13 @@ import DismissKeyboardView from '../components/DismissKeyboardView';
 import axios, {AxiosError} from 'axios';
 import Config from 'react-native-config';
 import {RootStackParamList} from '../../AppInner';
-import {useAppDispatch} from '../store';
 import userSlice from '../slices/user';
+import {useDispatch} from 'react-redux';
 
 type SignInScreenProps = NativeStackScreenProps<RootStackParamList, 'SignIn'>;
 
 function SignIn({navigation}: SignInScreenProps) {
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -53,14 +53,21 @@ function SignIn({navigation}: SignInScreenProps) {
       // 로그인을 하면 서버에서 토큰을 보내준다  response에 들어있겠지
       console.log(response.data);
       Alert.alert('알림', '로그인 되었습니다.');
-
+      // 데이터 전역으로 담기
       dispatch(
         userSlice.actions.setUser({
+          // 이 안의 값이 action.payload가 된다 (객체)
+          // 앞으로 요청을 보낼 때 Token을 넣어서 보내야지만 누가 보낸건지 알 수 있다
           name: response.data.data.name,
           email: response.data.data.email,
+          // accessToken 안에는 유저의 정보가 적혀있다 : 유효기간이 있다
           accessToken: response.data.data.accessToken,
+          // accessToken이 만료가 되었을 때 refreshToken이 재발급을 해줌 : 보안
+          // refreshToken이 탈취당했다? 그럼 진짜 답없다 -> 안전한 스토리지에 저장해둘것
         }),
       );
+
+      // refreshToken을 따로 보관한다 : 보안
       await EncryptedStorage.setItem(
         'refreshToken',
         response.data.data.refreshToken,
