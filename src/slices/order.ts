@@ -17,7 +17,9 @@ interface InitialState {
   deliveries: Order[];
 }
 const initialState: InitialState = {
+  // 전체 주문 리스트
   orders: [],
+  // 수락한 주문
   deliveries: [],
 };
 const orderSlice = createSlice({
@@ -47,6 +49,7 @@ const orderSlice = createSlice({
       }
     },
   },
+  // 비동기 액션 : 근데 이 프로젝트에서는 안 쓸 듯
   extraReducers: builder => {},
 });
 

@@ -5,6 +5,7 @@ const initialState = {
   name: '',
   email: '',
   accessToken: '',
+  money: 0,
 };
 const userSlice = createSlice({
   name: 'user',
@@ -17,6 +18,9 @@ const userSlice = createSlice({
       state.email = action.payload.email;
       state.name = action.payload.name;
       state.accessToken = action.payload.accessToken;
+    },
+    setMoney(state, action) {
+      state.money += action.payload;
     },
   },
   // extraReducers : 보통 비동기 리듀서 만들때 쓰임
