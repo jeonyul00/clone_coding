@@ -197,8 +197,66 @@ EncryptedStorage에 리프레시 토큰이 남아있잖아 그걸 서버로 보�
 네이버 지도
 npm i react-native-nmap --force
 
+ios는 git lfs를 써야됨
+brew install git-lfs
+
+설정 잡는거 겁나 어렵네;;
+---------------------------------------------------------------------------------------------------------------------------
+권한 얻기
+npm i react-native-permissions
+
+ios/Podfile
+
+permissions_path = '../node_modules/react-native-permissions/ios'
+pod 'Permission-Camera', :path => "#{permissions_path}/Camera"
+pod 'Permission-LocationAccuracy', :path => "#{permissions_path}/LocationAccuracy"
+pod 'Permission-LocationAlways', :path => "#{permissions_path}/LocationAlways"
+pod 'Permission-LocationWhenInUse', :path => "#{permissions_path}/LocationWhenInUse"
+pod 'Permission-Notifications', :path => "#{permissions_path}/Notifications"
+pod 'Permission-PhotoLibrary', :path => "#{permissions_path}/PhotoLibrary"
+
+info.plist
+<string>배송완료 사진 촬영을 위해 카메라 권한이 필요합니다.</string>
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>배송중 위치 확인을 위해서 위치 권한이 필요합니다.</string>
+<key>NSLocationAlwaysUsageDescription</key>
+<string>배송중 위치 확인을 위해서 위치 권한이 필요합니다.</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>배송중 위치 확인을 위해서 위치 권한이 필요합니다.</string>
+<key>NSMotionUsageDescription</key>
+<string>배송중 위치 확인을 위해서 위치 권한이 필요합니다.</string>
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>배송완료 사진 선택을 위해 라이브러리 접근 권한이 필요합니다.</string>
+<key>NSPhotoLibraryUsageDescription</key>
+<string>배송완료 사진 선택을 위해 라이브러리 접근 권한이 필요합니다.</string>
+
+<false/>밑에
+	<key>NMFClientId</key>
+	<string>9rpgkvbaic</string>	
+---------------------------------------------------------------------------------------------------------------------------
+내 위치가져오기
+npm i @react-native-community/geolocation
+
+Geolocation.getCurrentPosition(
+      info => {
+        setMyPosition({
+          latitude: info.coords.latitude,
+          longitude: info.coords.longitude,
+        });
+      },
+      console.error,
+      {
+        enableHighAccuracy: true,
+        timeout: 20000,
+      },
+    );
+
+
 ---------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------
+
 
 etc
 
