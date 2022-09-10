@@ -22,6 +22,9 @@ const userSlice = createSlice({
     setMoney(state, action) {
       state.money += action.payload;
     },
+    setAccessToken(state, action) {
+      state.accessToken = action.payload;
+    },
   },
   // extraReducers : 보통 비동기 리듀서 만들때 쓰임
   // 설명 참 거지같네; 나중에 알아보자

@@ -9,6 +9,7 @@ import {RootState} from '../store/reducer';
 import Config from 'react-native-config';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {LoggedInParamList} from '../../AppInner';
+import EncryptedStorage from 'react-native-encrypted-storage';
 
 interface Props {
   item: Order;

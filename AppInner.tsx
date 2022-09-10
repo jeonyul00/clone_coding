@@ -77,6 +77,44 @@ function AppInner() {
     getTokenAndRefresh();
   }, [dispatch]);
 
+  // axios interceptors
+  // 인터셉터 겁나 어렵다
+  useEffect(() => {
+    // 뜻 응답 올 때 사용한다
+    axios.interceptors.response.use(
+      // 성공 시
+      response => response,
+      // 실패 시
+      // error.config : 원래했던 요청 내역
+      // 여기서는 엑세스 토큰 만료되었을때 걸리겠지
+      async error => {
+        const {
+          config,
+          response: {status},
+        } = error;
+        if (status === 419) {
+          if (error.response.data.code === 'expired') {
+            // error.config : 원래했던 요청 내역
+            const originalRequest = config;
+            // token 재발급하는 코드
+            const refreshToken = await EncryptedStorage.getItem('refreshToken');
+            const {data} = await axios.post(
+              `${Config.API_URL}/refreshToken`,
+              {},
+              {headers: {authorization: `Bearer ${refreshToken}`}},
+            );
+            // 재발급 받은 토큰으로 다시 요청하는 코드
+            dispatch(userSlice.actions.setAccessToken(data.data.accessToken));
+            originalRequest.headers.authorization = `Bearer ${data.data.accessToken}`;
+            return axios(originalRequest);
+          }
+        }
+        // 419에러가 아닌 다른 에러일 때 : 각 자의 cache로 간다
+        return Promise.reject(error);
+      },
+    );
+  }, []);
+
   // 웹소켓
   const [socket, disconnect] = useSocket();
   // 웹소켓
