@@ -15,6 +15,7 @@ import SignUp from './src/pages/SignUp';
 import orderSlice from './src/slices/order';
 import userSlice from './src/slices/user';
 import {RootState} from './src/store/reducer';
+import SplashScreen from 'react-native-splash-screen';
 
 export type LoggedInParamList = {
   Orders: undefined;
@@ -45,6 +46,7 @@ function AppInner() {
       try {
         const token = await EncryptedStorage.getItem('refreshToken');
         if (!token) {
+          SplashScreen.hide();
           return;
         }
         const response = await axios.post(
@@ -142,6 +144,27 @@ function AppInner() {
       }
     };
   }, [dispatch, isLoggedIn, socket]);
+
+  // fcm
+  // 토큰 설정
+  useEffect(() => {
+    async function getToken() {
+      try {
+        if (!messaging().isDeviceRegisteredForRemoteMessages) {
+          await messaging().registerDeviceForRemoteMessages();
+        }
+        const token = await messaging().getToken();
+        console.log('phone token', token);
+        // 리덕스에 저장
+        dispatch(userSlice.actions.setPhoneToken(token));
+        // 기기 토큰 서버에 전송, 헤더에 넣을 필요 없다
+        return axios.post(`${Config.API_URL}/phonetoken`, {token});
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    getToken();
+  }, [dispatch]);
 
   useEffect(() => {
     if (!isLoggedIn) {

@@ -12,13 +12,16 @@ type IngScreenProps = NativeStackScreenProps<LoggedInParamList, 'Delivery'>;
 function Ing({navigation}: IngScreenProps) {
   console.dir(navigation);
   const deliveries = useSelector((state: RootState) => state.order.deliveries);
+  // 내 위치 변수
   const [myPosition, setMyPosition] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
 
   useEffect(() => {
-    Geolocation.getCurrentPosition(
+    // Geolocation.getCurrentPosition :프롭스 안에 내 위치 정보가 있다
+    // Geolocation.watchPosition: 내 위치가 바뀔 수도 있을 때 씀
+    Geolocation.watchPosition(
       info => {
         setMyPosition({
           latitude: info.coords.latitude,
@@ -27,8 +30,11 @@ function Ing({navigation}: IngScreenProps) {
       },
       console.error,
       {
+        // enableHighAccuracy: true : 정확하게 가져오려면 true
         enableHighAccuracy: true,
         timeout: 20000,
+        // 10m 이상 움직였을 때 업데이트하겠다
+        distanceFilter: 10,
       },
     );
   }, []);

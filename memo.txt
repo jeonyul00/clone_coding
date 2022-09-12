@@ -253,10 +253,205 @@ Geolocation.getCurrentPosition(
 
 
 ---------------------------------------------------------------------------------------------------------------------------
+이미지 선택 후 리사이징
+npm i react-native-image-crop-picker
+npm i react-native-image-resizer
+리사이즈 안하면 용량 너무 커서 서버 터질 수도 있다 그러니까 프론트에서 해줘야함
+
+아 이거 겁나 어렵네..
+complete component에 코드 있음
+
 ---------------------------------------------------------------------------------------------------------------------------
+이미지 업로드
+{uri : '' filename:'' type: '확장자'} 
+이런 형식의 파일을
+multipart/form-data 통해서 업로드
 ---------------------------------------------------------------------------------------------------------------------------
+라이브러리 패칭 : 기능 수정 추가 등등
+npm i patch-package
+이거 진짜 개 어렵다.. 그나마 다행인건 내가 자바를 조금 읽을 수 있다는거..
+ios 는 오브젝트 씨인데 좆됐다..
+
+node_modules에서 원하는 라이브러리에서 ios에서 src에서
+(라이브러리명.h (이게 헤더)에서 네이티브모듈을 연결해준다)
+라이브러리명.m (실질적으로 비지니스로직이 들어있다)에서 @"saveToPhotos":@NO 옵션 추가
+후에 CFStringCompare쪽에서 NSString *moviePath = [url path]; 추가
+
+후에 밑에
+if([[self.options objectForKey:@"saveToPhotos"] boolValue]){
+            if(UIVideoPathIsCompatibleWithSavedPhotosAlbum(moviePath)){
+                UIVideoPathIsCompatibleWithSavedPhotosAlbum(moviePath, nil,nil,nil);
+            }
+        }
+
+아니시발 이게 다 뭐야 ;;
+후에 index.d.ts 에서 그 뭐냐 그 타입 지정
+saveToPhotos?:boolean;
+
+이러면 된대 시발 이걸 어케알아
+근데 이렇게 하고 난 후에 npm i 하면 내가 커스텀한 모듈이 초기화 된대
+그러면 어떻게 해야하냐?
+    pathch-package 수정한 모듈이름
+을 터미널에 치면 안 날라감
+
+와 시발 이거 하지마
+---------------------------------------------------------------------------------------------------------------------------
+스플래시
+npm i react-native-splash-screen
+
+---------------------------------------------------------------------------------------------------------------------------
+앱 아이콘 변경
+npm i react-native-vector-icons
+npm i -D @types/react-native-vector-icons
+
+---------------------------------------------------------------------------------------------------------------------------
+이미지 그리드 만들기 : 이거 유용할 듯
+npm i react-native-fast-image
+
+
+---------------------------------------------------------------------------------------------------------------------------
+앱 출시
+
+애플 개발자 계정 등록
+https://developer.apple.com/ -> join the apple developer program에서 개발자 등록 -> enroll
+이것저것 체크하고 결제 .. -> certificates, identifiers & profiles -> 아 우선 맥의 키체인에 접근
+키체인 접근/인증서지원/인증기관에서 인증서요청 누르고 -> 이메일 쓰고 (애플개발자계정) -> 다운로드
+-> 다시 certificates, identifiers & profiles페이지 가서 등록하기 -> 애플 디벨롭먼트 체크(개발용)
+출시용은 ios distribution이다 -> 파일 선택 창에서 아까 받은 그 파일 선택 -> 다운로드
+이 방식으로 배포용 하나 더 받으셈(ios distribution) -> 그럼 파일이 총 2개겠지? -> 키체인 접근해서 그 파일 두개를 드래그앤드롭
+-> xcode워크스페이스 가서 앱 최상단에서 signing&capabilities 에서 team에서 내 계정, 만약 없으면 에드 어카운트해서 계정 추가해야함
+-> 테스트도 마찬가지로 진행 -> 계정연결 완료
+프로필 만들기 -> ㅣ홈페이지에서 프로필 추가 버튼 -> ios app development -> 앱 아덴티티 입력 -> 테스트 장치 선택 -> 뭐시기 입력 다운로드
+같은 방식으로 디벨롭먼트가아니고 앱스토어 누르고 다운로드
+이러면 xcode에서 자동으로 뭐가 등록됨
+
+---------------------------------------------------------------------------------------------------------------------------
+fcm ㅣ 푸시알림
+npm i @react-native-firebase/analytics @react-native-firebase/app @react-native-firebase/messaging
+npm i react-native-push-notification @react-native-community/push-notification-ios
+npm i -D @types/react-native-push-notification
+
+firebase 프로젝트 설정 - Admin SDK - Node.js - 새 비공개키 생성 - back 폴더 안에 넣고 app.js 소스 수정
+안드로이드 앱 설정 후 google-services.json을 android/app에 넣기
+[ios] 아이폰 앱 설정 후 ios/GoogleService-Info.plist 생성
+배송 완료시 push 알림이 올 것임(에뮬레이터에서는 안 올 수 있음)
+
+firebase에 앱 등록하면 뭐 파일 주는데 그거 공홈 처럼 따라하면 됨 잘나와있음
+안드로이드 아이오에스 따로따로 등록해야함
+
+세팅 다 했으면 코드 짜는데
+컴포넌트 내부에 넣으면 안됨
+app.tsx
+
+notification : 이 안에 타이틀, 내용이 들어있고 채널 등도 넣을 수 있다 이걸 서버에서 클라이언트로 보내는거지
+
+
+서버가 기기로 알림을 보내려면 기기 토큰이 필요
+푸시알림 등록을하면 토큰을 발급해줌 -> 서버로 토큰을 보냄 -> 서버에서 토큰으로 기기를 찾아서 알림을 보냄
+
+서버로 기기 토큰 보내는 법은 AppInner.tsx에 있음
+
+messaging().registerDeviceForRemoteMessages(): 기기등록
+
+테스트 할 때는 파이어베이스 페이지에서 보낼 수 있다
+
+---------------------------------------------------------------------------------------------------------------------------
+코드 푸시
+안드로이드 설정
+appcenter.ms에 로그인하고 add new클릭해서 new app 앱 등록할 것 (안드로이드용, 아이폰용 따로 만들어야함)-> type 설정 안해도 됨  add new app ->그럼 뭐 설명 나옴 뭐 설치하라고 하고 그런다
+npm audit 어쩌구 나오는데 설치 -> npm install appcenter appcenter-analytics appcenter-crashes -> npm i react-native-code-push -> npm i -g appcenter-cli (app center 명령어를 쓰기위해)
+-> 설치되는 동안 아까 웹에서 안내하는거 다 따라하셈 -> 후에 distribute에서 codepush가서 클릭하면 또 설명 나옴 뭐 설정할거 개개개개많음 -> 그 중에 strings.xml에 키를 적어야됨 -> appcenter login 후에 뭐 웹이뜬다 거기에 있는 키를 복사해서 입력한 후에
+-> appcenter codepush deployment list -a zerohch0/food-delivery-app-android -k (이건 안드로이드 키 가져오는거다, ios는 android대신 ios를 써야됨)
+-> 하면 키가 두개 나옴 거기서 스테이징 키를 복사해서 string.xml에 붙여넣는다 나중에 배포할때는 스테이징 말고 프로덕션으로 해야됨
+: 그럼 이제 코드푸시 할 때 스테이징용 앱들한테는 코드 푸시가 됨 , 나중에 출시 할 때는 프로덕션으로 바꿔줘야 겠지? ㅇㅋ
+
+코드푸시하는법
+패키지.제이슨에 코드푸시 명령어들 넣기
+    "codepush:android": "appcenter codepush release-react -a 아이디/앱이름 -d 배포이름(스테이징인지, 프로덕션인지, 프로덕션이면 키도 써야됨) --sourcemap-output --output-dir ./build -m -t 타겟버전(1.0.0)",
+    "codepush:ios": "appcenter codepush release-react -a 아이디/앱이름 -d 배포이름 --sourcemap-output --output-dir ./build -m -t 타겟버전",
+    "bundle:android": "react-native bundle --assets-dest build/CodePush --bundle-output build/CodePush/index.android.bundle --dev false --entry-file index.js --platform android --sourcemap-output build/CodePush/index.android.bundle.map",
+    "bundle:ios": "react-native bundle --assets-dest build/CodePush --bundle-output build/CodePush/main.jsbundle --dev false --entry-file index.js --platform ios --sourcemap-output build/CodePush/main.jsbundle.map",  
+    
+    타겟 버전 굉장히 중요 : 1.2 이런식으로 적으면 버전이 1.2.3인 앱들은 코드푸시의 적용을 받는거지 다만 1.3.6 이런 애들은 적용을 안 받는다
+    앞으로 버전을 막 올리면 코드 푸시를 못 쓰는 상황이 생긴다 : 팁을 주자면 src부분만 수정되었다? 맨 뒷버전을 올려라 그럼 코드푸시 먹히겠지
+    중간 숫자 올리면 출시
+
+    나중에 코드 수정 후 npm run codepush:android 하면 바로 배포 됨
+    
+사용은 어떻게하냐?
+    export default CodePush(App)
+끝
+만약 옵션을 넣고 싶다
+
+
+ useEffect(() => {
+    CodePush.sync(
+      {
+        installMode: CodePush.InstallMode.IMMEDIATE,
+        mandatoryInstallMode: CodePush.InstallMode.IMMEDIATE,
+        updateDialog: {
+          mandatoryUpdateMessage:
+            '필수 업데이트가 있어 설치 후 앱을 재시작합니다.',
+          mandatoryContinueButtonLabel: '재시작',
+          optionalIgnoreButtonLabel: '나중에',
+          optionalInstallButtonLabel: '재시작',
+          optionalUpdateMessage: '업데이트가 있습니다. 설치하시겠습니까?',
+          title: '업데이트 안내',
+        },
+      },
+      status => {
+        console.log(`Changed ${status}`);
+      },
+      downloadProgress => {
+        // 여기서 몇 % 다운로드되었는지 체크 가능
+      },
+    ).then(status => {
+      console.log(`CodePush ${status}`);
+    });
+  }, []);
+
+
+const codePushOptions: CodePushOptions = {
+  checkFrequency: CodePush.CheckFrequency.MANUAL,
+  // 언제 업데이트를 체크하고 반영할지를 정한다.
+  // ON_APP_RESUME은 Background에서 Foreground로 오는 것을 의미
+  // ON_APP_START은 앱이 실행되는(켜지는) 순간을 의미
+
+  installMode: CodePush.InstallMode.IMMEDIATE,
+  mandatoryInstallMode: CodePush.InstallMode.IMMEDIATE,
+  // 업데이트를 어떻게 설치할 것인지 (IMMEDIATE는 강제설치를 의미)
+};
+
+    export default CodePush(CodePushOption)(App)
+
+히스토리는 앱센터 웹에 distribute의 codepush에 있다
+
+
+ios 설정
+npm i react-native-code-push -> AppDelegate.m -> #import <CodePush/CodePush.h> -> 아 뭐 되게 많음
+-> info.plist가서 키 추가(이것도 상황따라 어떤키인지 다르겠지) -> 앱센터에서 안드로이드 만든것처럼 아이폰용 앱 만든다 -> 하라는 대로 한다
+-> xcode에서 프로젝트 우클릭 -> add file to '프로젝트 명' 해서 앱센터컨피스피리스트 선택 추가 할 것 -> vuild pahases에 카피어쩌구에 앱센터와 구글서비스 피리스트 있어야됨
+-> 
+
+
+
 ---------------------------------------------------------------------------------------------------------------------------
 
+앱 출시
+리네 프로젝트는 앱 용량이 개 크다 -> 헤르메스라는 애들 적용하면 좀 작아진다 -> 이거 리네 공홈에 있다 설정하면됨
+
+ios 앱 출시
+testFlight : 출시 전 테스팅
+appstoreconnect.apple.com에 개발자용 계정 로그인 앱 추가 고유한 값 넣어주고-> 앱 추가-> xcode에서 기종을 any IOS device로 체크 후에 아카이브 해주면 됨 (프로덕트 메뉴에 있음)
+-> distribute app 클릭 이거 끝나면 알아서 등록이 되나보다 -> 이거 하고 빌드에서 앱 누르고 심사 요청 보내면 됨 결과는 며칠 뒤 나옴
+
+android 앱 출시용은
+apk , aad 만들어야된다고? ㅇㅋ 어떻게...?
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------
 
 etc
 
